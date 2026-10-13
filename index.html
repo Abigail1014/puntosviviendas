@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa de Cobertura - Riberalta, Beni, Bolivia</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #2c3e50;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .map-container {
+      width: 95%;
+      max-width: 1200px;
+      height: 85vh;
+      background: #1e293b;
+      border: 3px solid #475569;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      grid-template-rows: 60px 1fr;
+    }
+
+    .map-header {
+      grid-column: 1 / -1;
+      background: #0f172a;
+      border-bottom: 2px solid #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .map-header h1 {
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin: 0;
+      color: #f8fafc;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      background: #e2e8f0;
+    }
+
+    .sidebar {
+      background: #0f172a;
+      border-left: 2px solid #475569;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #475569;
+      padding-bottom: 8px;
+      margin-top: 0;
+      color: #38bdf8;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .legend-item:hover {
+      color: #38bdf8;
+    }
+
+    .color-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      margin-right: 10px;
+      flex-shrink: 0;
+      border: 1px solid #fff;
+    }
+
+    .mini-maps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-top: 15px;
+      border-top: 1px solid #475569;
+      padding-top: 15px;
+    }
+
+    .mini-box {
+      background: #334155;
+      border: 1px solid #64748b;
+      text-align: center;
+      font-size: 9px;
+      padding: 5px;
+      border-radius: 2px;
+      color: #cbd5e1;
+    }
+
+    .footer-info {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 15px;
+      border-top: 1px solid #334155;
+      padding-top: 10px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 850px) {
+      .map-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 60px 400px auto;
+        height: 95vh;
+      }
+      .sidebar {
+        border-left: none;
+        border-top: 2px solid #475569;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="map-container">
+    <div class="map-header">
+      <h1>MAPA DE COBERTURA - ZONA URBANA DE RIBERALTA. PC VIDA BENI - BOLIVIA</h1>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="sidebar">
+      <div>
+        <h3>Referencias</h3>
+        
+        <div class="legend-item" onclick="centrarBarrio(-11.0180, -66.0720, 15)">
+          <div class="color-box" style="background: #e74c3c;"></div>
+          <span>Bioceánica</span>
+        </div>
+        <div class="legend-item" onclick="centrarBarrio(-11.0020, -66.0680, 15)">
+          <div class="color-box" style="background: #f1c40f;"></div>
+          <span>Beni</span>
+        </div>
+        <div class="legend-item" onclick="centrarBarrio(-10.9920, -66.0580, 15)">
+          <div class="color-box" style="background: #9b59b6;"></div>
+          <span>Popechi</span>
+        </div>
+        <div class="legend-item" onclick="centrarBarrio(-11.0120, -66.0540, 15)">
+          <div class="color-box" style="background: #e67e22;"></div>
+          <span>Arenas</span>
+        </div>
+        <div class="legend-item" onclick="centrarBarrio(-11.0090, -66.0810, 15)">
+          <div class="color-box" style="background: #2ecc71;"></div>
+          <span>Esperanza</span>
+        </div>
+
+        <div class="mini-maps">
+          <div class="mini-box">Bolivia<br><b>Beni</b></div>
+          <div class="mini-box">Beni<br><b>Riberalta</b></div>
+          <div class="mini-box">Riberalta<br><b>Zonas</b></div>
+        </div>
+      </div>
+
+      <div class="footer-info">
+        <b>Sources:</b> Esri, DeLorme, NAVTEQ.<br>
+        Digitalización de Barrios - Municipio de Riberalta.
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Inicializar mapa centrado en Riberalta, Beni
+    var map = L.map('map', {
+      zoomControl: false
+    }).setView([-11.0065, -66.0650], 14);
+
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // Usar Esri World Street Map (100% libre, sin restricciones ni claves de API)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom'
+    }).addTo(map);
+
+    // Datos de los barrios solicitados
+    var puntosBarrios = [
+      { nombre: "Barrio Bioceánica", lat: -11.0180, lng: -66.0720, color: "#e74c3c", desc: "Zona Sur / Sudeste" },
+      { nombre: "Barrio Beni", lat: -11.0020, lng: -66.0680, color: "#f1c40f", desc: "Zona Central-Urbana" },
+      { nombre: "Barrio Popechi", lat: -10.9920, lng: -66.0580, color: "#9b59b6", desc: "Zona Este / Noreste" },
+      { nombre: "Barrio Arenas", lat: -11.0120, lng: -66.0540, color: "#e67e22", desc: "Zona Este" },
+      { nombre: "Barrio Esperanza", lat: -11.0090, lng: -66.0810, color: "#2ecc71", desc: "Zona Oeste / Suroeste" }
+    ];
+
+    // Añadir marcadores
+    puntosBarrios.forEach(function(b) {
+      var customIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="background-color: ${b.color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.6);"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+      });
+
+      L.marker([b.lat, b.lng], { icon: customIcon })
+        .addTo(map)
+        .bindPopup(`<b>${b.nombre}</b><br>${b.desc}<br><small>Riberalta - Beni, Bolivia</small>`);
+    });
+
+    function centrarBarrio(lat, lng, zoom) {
+      map.flyTo([lat, lng], zoom, {
+        duration: 1.2
+      });
+    }
+  </script>
+
+</body>
+</html>
